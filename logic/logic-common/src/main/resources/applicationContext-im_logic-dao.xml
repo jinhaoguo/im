@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jee="http://www.springframework.org/schema/jee"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+	
+	<bean id="imLogicDataSource_r" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url"
+			value="jdbc:mysql://${im.logic.db.r.host}:${im.logic.db.r.port}/im?useUnicode=true&amp;characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull" />
+		<property name="username" value="${im.logic.db.r.username}" />
+		<property name="password" value="${im.logic.db.r.password}" />
+		<property name="initialSize" value="2" />
+		<property name="maxActive" value="5" />
+		<property name="maxIdle" value="5" />
+		<property name="maxWait" value="5000" />
+		<property name="testWhileIdle" value="true" />
+		<property name="validationQuery" value=" SELECT 1 " />
+		<property name="poolPreparedStatements" value="true" />
+	</bean>
+	
+    <bean id="imLogicDataSource_w" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url"
+			value="jdbc:mysql://${im.logic.db.w.host}:${im.logic.db.w.port}/im?useUnicode=true&amp;characterEncoding=utf8&amp;zeroDateTimeBehavior=convertToNull" />
+		<property name="username" value="${im.logic.db.w.username}" />
+		<property name="password" value="${im.logic.db.w.password}" />
+		<property name="initialSize" value="2" />
+		<property name="maxActive" value="5" />
+		<property name="maxIdle" value="5" />
+		<property name="maxWait" value="5000" />
+		<property name="testWhileIdle" value="true" />
+		<property name="validationQuery" value=" SELECT 1 " />
+		<property name="poolPreparedStatements" value="true" />
+	</bean>
+    
+    <bean id="imLogicTransactionManager"
+        class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="imLogicDataSource_w" ></property>
+    </bean>
+    
+    <bean id="imLogicTxProxyTemplate" abstract="true"
+        class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+        <property name="transactionManager">
+            <ref bean="imLogicTransactionManager" />
+        </property>
+        <property name="transactionAttributes">
+            <props>
+                <prop key="*">PROPAGATION_REQUIRED</prop>
+            </props>
+        </property>
+    </bean>
+    
+	<bean id="imLogicBaseDao" abstract="true"
+		class="com.fans.data.common.dao.impl.BaseDaoImpl">
+		<property name="dataSourceReadOnly" ref="imLogicDataSource_r" />
+		<property name="dataSource" ref="imLogicDataSource_w" />
+	</bean>
+    	
+    <bean id="userImConfigDao" parent="imLogicTxProxyTemplate">
+        <property name="target">
+            <bean class="com.fans.im.logic.common.dao.impl.UserImConfigDaoImpl"
+                parent="imLogicBaseDao" />
+        </property>
+    </bean>	
+</beans>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jee="http://www.springframework.org/schema/jee"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+	<bean id="imLogicPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+		<property name="maxIdle" value="20" />
+		<property name="minIdle" value="10" />
+		<property name="maxTotal" value="50" />
+		<property name="maxWaitMillis" value="30000" />
+	</bean>
+	
+	<bean id="imLogicJedisPool" class="redis.clients.jedis.JedisPool"
+		destroy-method="destroy">
+		<constructor-arg name="poolConfig" ref="imLogicPoolConfig" />
+		<constructor-arg name="host" type="java.lang.String"
+			value="${im_logic.redis.cache.host}" />
+		<constructor-arg name="port" type="int" value="${im_logic.redis.cache.port}" />
+		<constructor-arg name="timeout" type="int" value="${redis.timeout}" />
+	</bean>
+	
+	<bean id="imLogicHashCacheRao" class="com.fans.data.common.proxy.rao.impl.HashCacheRaoImpl">
+		<property name="jedisPool" ref="imLogicJedisPool" />
+		<property name="retryTimes" value="3" />
+	</bean>
+	
+	<bean id="tupleStringDoubleConvert"
+        class="com.fans.data.common.rao.convert.TupleStringDoubleConvert" />
+	
+	<bean id="imLogicStringIndexCacheRao" class="com.fans.data.common.proxy.rao.impl.IndexCacheRaoImpl">
+		<property name="tupleObjectDoubleConvert" ref="tupleStringDoubleConvert" />
+		<property name="jedisPool" ref="imLogicJedisPool" />
+		<property name="retryTimes" value="3" />
+	</bean>
+	
+	<bean id="userDialogIndexRao" class="com.fans.im.logic.common.rao.impl.UserDialogIndexRaoImpl">
+		<property name="indexCacheRao" ref="imLogicStringIndexCacheRao" />
+		<property name="keyPrefix" value="ud" />
+	</bean>
+
+	<bean id="dialogMessageIndexRao" class="com.fans.im.logic.common.rao.impl.DialogMessageIndexRaoImpl">
+		<property name="indexCacheRao" ref="imLogicStringIndexCacheRao" />
+		<property name="keyPrefix" value="dm" />
+	</bean>
+	
+	<!--  <bean id="userLastPositionRao" class="com.fans.im.logic.common.rao.impl.UserLastPositionRaoImpl">
+		<property name="hashCacheRao" ref="imLogicHashCacheRao" />
+		<property name="keyPrefix" value="lttk" />
+		<property name="seconds" value="2592000" />
+	</bean>-->
+	
+	<bean id="userOnlineRao" class="com.fans.im.logic.common.rao.impl.UserOnlineRaoImpl">
+		<property name="hashCacheRao" ref="imLogicHashCacheRao" />
+		<property name="keyPrefix" value="uonline" />
+		<property name="seconds" value="2592000" />
+	</bean>
+	
+	<bean id="userOfflineCountRao" class="com.fans.im.logic.common.rao.impl.UserOfflineCountRaoImpl">
+		<property name="hashCacheRao" ref="imLogicHashCacheRao" />
+		<property name="keyPrefix" value="uoffline" />
+		<property name="seconds" value="2592000" />
+	</bean>
+	
+	<bean id="userImConfigRao" class="com.fans.im.logic.common.rao.impl.UserImConfigRaoImpl">
+		<property name="hashCacheRao" ref="imLogicHashCacheRao" />
+		<property name="keyPrefix" value="uconf" />
+		<property name="seconds" value="86400" />
+	</bean>
+</beans>

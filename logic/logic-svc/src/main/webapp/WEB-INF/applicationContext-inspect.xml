@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jee="http://www.springframework.org/schema/jee"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+
+    
+    <bean id="user_redis_inspect" class="com.fans.data.common.inspect.RedisInspect">
+        <constructor-arg value="user_redis" />
+        <constructor-arg value="WARN" />
+        <property name="jedisPool" ref="userJedisPool" />
+    </bean>
+
+	<!-- im_logic  -->
+	<bean id="im_logic_redis_inspect" class="com.fans.data.common.inspect.RedisInspect">
+		<constructor-arg value="im_logic_redis" />
+        <constructor-arg value="WARN" />
+        <property name="jedisPool" ref="imLogicJedisPool" />
+	</bean>
+	<!-- im_logic end -->
+	
+	<bean id="inspectMap" class="java.util.HashMap">
+		<constructor-arg>
+			<map>
+				<entry key="user_redis" value-ref="user_redis_inspect"></entry>
+                <entry key="im_logic_redis_inspect" value-ref="im_logic_redis_inspect"></entry>				
+			</map>
+		</constructor-arg>
+	</bean>
+</beans>

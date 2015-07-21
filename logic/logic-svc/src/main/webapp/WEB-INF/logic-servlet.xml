@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context-4.0.xsd
+		http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd">
+
+	<context:component-scan base-package="com.fans.im.*"
+		use-default-filters="false">
+		<context:include-filter type="regex"
+			expression="com.fans.data.common.xinterface.controller.*" />
+		<context:include-filter type="regex"
+			expression="com.fans.im.logic.svc.api.v1.restful.[^$]*" />
+	</context:component-scan>
+	
+	<mvc:resources mapping="/jamon/images/**" location="/jamon/images/" />
+	<mvc:resources mapping="/jamon/css/**" location="/jamon/css/" />
+
+	<mvc:interceptors>
+		<bean
+			class="com.fans.data.common.xinterface.view.CustomResultHandlerInterceptorAdapter">
+			<property name="noInterceptors" ref="noInterceptors" />
+		</bean>
+	</mvc:interceptors>
+
+	<bean id="noInterceptors" class="java.util.HashSet">
+		<constructor-arg>
+			<set>
+				<value>XML_NO_INTERCEPTOR</value>
+			</set>
+		</constructor-arg>
+	</bean>
+
+	<!-- To enable @RequestMapping process on type level and method level -->
+	<bean
+		class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping" />
+
+	<bean
+		class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter" />
+
+	<bean
+		class="com.fans.data.common.xinterface.view.CustomExceptionHandlerResolver" />
+
+	<bean
+		class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+		<property name="favorPathExtension" value="true" />
+		<property name="order" value="1" />
+		<property name="mediaTypes">
+			<map>
+				<entry key="json" value="application/json" />
+				<entry key="jsonp" value="application/javascript" />
+				<entry key="xml" value="application/xml" />
+			</map>
+		</property>
+		<property name="defaultViews">
+			<list>
+				<bean class="com.fans.data.common.xinterface.view.JsonMappingJacksonView">
+					<property name="disableCaching" value="false" />
+				</bean>
+				<bean class="com.fans.data.common.xinterface.view.JsonpMappingJacksonView">
+					<property name="disableCaching" value="false" />
+				</bean>
+				<!-- <bean class="org.springframework.web.servlet.view.xml.MarshallingView"> 
+					<property name="marshaller"> <bean class="org.springframework.oxm.xstream.XStreamMarshaller"> 
+					<property name="autodetectAnnotations" value="true" /> </bean> </property> 
+					</bean> -->
+			</list>
+		</property>
+		<property name="defaultContentType" value="application/json" />
+	</bean>
+</beans>

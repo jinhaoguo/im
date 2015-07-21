@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app id="im_logic" version="3.0" xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+	
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>
+		    classpath*:/applicationContext-im_logic-rao.xml
+		    classpath*:/applicationContext-im_logic-dao.xml
+		    classpath*:/applicationContext-user.xml
+		    
+			/WEB-INF/applicationContext*.xml
+			
+			classpath*:/applicationContext-follow-cached-service.xml
+			classpath*:/applicationContext-pushnotify-msg-sender.xml
+			
+		</param-value>
+	</context-param>
+	
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+	
+	<listener>
+		<listener-class>org.springframework.web.context.ContextCleanupListener</listener-class>
+	</listener>
+	
+	<listener>
+		<listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>
+	</listener>
+	
+	<filter>
+		<filter-name>SetCharacterEncoding</filter-name>
+		<filter-class>com.fans.data.common.xinterface.filter.SetCharacterEncodingFilter</filter-class>
+		<init-param>
+			<param-name>encoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+	</filter>
+	
+	<filter-mapping>
+		<filter-name>SetCharacterEncoding</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+	<filter>
+		<filter-name>AuthorizationFilter</filter-name>
+		<filter-class>com.fans.data.common.xinterface.filter.AuthorizationFilter</filter-class>
+		<init-param>
+			<param-name>excludePatterns</param-name>
+			<param-value>
+				/remote/.*
+			</param-value>
+		</init-param>
+	</filter>
+	
+	<filter-mapping>
+		<filter-name>AuthorizationFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	
+	<filter>
+		<filter-name>JsonpHttpMethodFilter</filter-name>
+		<filter-class>com.fans.data.common.xinterface.filter.JsonpHttpMethodFilter</filter-class>
+	</filter>
+	
+	<filter-mapping>
+		<filter-name>JsonpHttpMethodFilter</filter-name>
+		<servlet-name>logic</servlet-name>
+	</filter-mapping>
+	
+	<servlet>
+		<servlet-name>logic</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<init-param>
+			<param-name>logic</param-name>
+			<param-value>/WEB-INF/logic-servlet.xml</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>logic</servlet-name>
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+</web-app>

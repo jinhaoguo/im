@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:jee="http://www.springframework.org/schema/jee"
+	xsi:schemaLocation="
+            http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/context
+            http://www.springframework.org/schema/context/spring-context.xsd
+            http://www.springframework.org/schema/aop
+            http://www.springframework.org/schema/aop/spring-aop.xsd
+            http://www.springframework.org/schema/tx
+            http://www.springframework.org/schema/tx/spring-tx.xsd
+            http://www.springframework.org/schema/jee
+     		http://www.springframework.org/schema/jee/spring-jee-3.0.xsd">
+
+	<bean id="propertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath*:${fans_env}_config/config.properties</value>
+				<value>classpath*:${fans_env}_config/msg.properties</value>
+				<value>classpath*:${fans_env}_config/redis.properties</value>
+				<value>classpath*:${fans_env}_config/db.properties</value>
+			</list>
+		</property>
+	</bean>
+	
+	<context:component-scan base-package="com.fans.im.logic.common.service.impl"
+		use-default-filters="false">
+		<context:include-filter type="annotation"
+			expression="org.springframework.stereotype.Service" />
+	</context:component-scan>
+
+	<context:component-scan base-package="com.fans.im.*"
+		use-default-filters="false">
+		<context:include-filter type="regex"
+			expression="com.fans.im.logic.svc.manager.[^$]*" />
+		<context:include-filter type="regex"
+			expression="com.fans.im.logic.svc.api.v1.convert.[^$]*" />
+		<context:include-filter type="regex"
+			expression="com.fans.im.msg.processor.impl.[^$]*" />
+		<context:include-filter type="regex"
+			expression="com.fans.im.rpc.service.impl.*" />
+	</context:component-scan>
+
+	<bean id="imDispathMessageSender"
+		class="com.fans.data.common.msg.kafka.service.impl.KafkaMessageSenderImpl"
+		destroy-method="destory">
+		<constructor-arg name="configurefile" type="java.lang.String"
+			value="/${fans_env}_config/msg.properties" />
+		<property name="defaultTopicName" value="${dispath.topic}" />
+	</bean>
+	
+	<bean id="imNotifyMessageSender"
+		  class="com.fans.data.common.msg.kafka.service.impl.KafkaMessageSenderImpl"
+		  destroy-method="destory">
+		<constructor-arg name="configurefile" type="java.lang.String"
+						 value="/${fans_env}_config/notifymsg.sender.properties" />
+		<property name="defaultTopicName" value="${notify.1.topic}" />
+	</bean>
+	
+	<bean id="imMessageDispatchConsumer"
+		  class="com.fans.data.common.msg.kafka.KafkaConsumer"
+		  destroy-method="destory" >
+		<constructor-arg name="configureFileName" type="java.lang.String"
+						 value="/${fans_env}_config/msg-dispatch-consumer.properties"/>
+		<constructor-arg name="topic" type="java.lang.String"  value="${dispath.topic}" />
+		<constructor-arg name="partitionThreadNum" type="java.lang.Integer" value="2" />
+		<constructor-arg name="messageProcessor" ref="msgDispatchProcessor" />
+	</bean>
+
+
+	<bean id="pushServers" class="java.util.ArrayList">
+		<constructor-arg>
+			<list>
+				<value>${push.server.1}</value>
+			</list>
+		</constructor-arg>
+
+	</bean>
+
+</beans>
